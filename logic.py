@@ -1,5 +1,6 @@
 import sqlite3
-from datetime import datetime
+
+deneme = "deneme"
 
 class DatabaseManager:
     def __init__(self, database):
@@ -18,12 +19,11 @@ class DatabaseManager:
                 )
             ''')
 
-    def add_entry(self, user_id, content):
-        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    def add_entry(self, user_id, content, timestamp):
         conn = sqlite3.connect(self.database)
         with conn:
             conn.execute('INSERT INTO journal (user_id, content, timestamp) VALUES (?, ?, ?)', 
-                         (user_id, content, now))
+                         (user_id, content, timestamp))
 
     def get_entries(self, user_id):
         conn = sqlite3.connect(self.database)
@@ -46,10 +46,16 @@ class DatabaseManager:
             return cursor.fetchall()
 
     def update_entry(self, user_id, entry_id, new_content):
-        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn = sqlite3.connect(self.database)
         with conn:
             conn.execute(
-                'UPDATE journal SET content = ?, timestamp = ? WHERE user_id = ? AND id = ?', 
-                (new_content, now, user_id, entry_id)
+                'UPDATE journal SET content = ? WHERE user_id = ? AND id = ?', 
+                (new_content, user_id, entry_id)
             )
+
+    def get_entry(self, user_id, entry_id):
+        conn = sqlite3.connect(self.database)
+        with conn:
+            cursor = conn.execute('SELECT id, content, timestamp FROM journal WHERE user_id = ? AND id = ?', 
+                                  (user_id, entry_id))
+            return cursor.fetchone()
